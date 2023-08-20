@@ -10,6 +10,8 @@ from settings import settings
 
 class Game:
     def __init__(self):
+        pygame.init()
+
         self.screen_width, self.screen_height = settings["screen_width"], settings["screen_height"]
 
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
@@ -31,8 +33,10 @@ class Game:
                                    self.screen_height / 2 - self.paddle_height / 2,                         # top
                                    self.paddle_width, self.paddle_height)
         
+        self.score = Score(self.screen)
+
         self.ball_radius = settings["ball_radius"]
-        self.ball = Ball(self.ball_radius, self.paddle_left, self.paddle_right)
+        self.ball = Ball(self.ball_radius, self.paddle_left, self.paddle_right, self.score)
     
     def run(self):
         while True:
@@ -58,6 +62,7 @@ class Game:
 
         self.screen.fill(self.bg_color)
 
+        self.score.draw()
         pygame.draw.rect(self.screen, self.paddle_left.color, self.paddle_left)
         pygame.draw.rect(self.screen, self.paddle_right.color, self.paddle_right)
         pygame.draw.circle(self.screen, self.ball.color,
@@ -121,22 +126,23 @@ class Paddle(pygame.Rect):
 
 
 class Ball:
-    def __init__(self, radius, paddle_left, paddle_right):
+    def __init__(self, radius, paddle_left, paddle_right, score):
         self.screen_width, self.screen_height = settings["screen_width"], settings["screen_height"]
         self.x, self.y = self.screen_width / 2, self.screen_height / 2
         self.radius = radius
         self.color = settings["ball_color"]
+
         self.angles = [math.pi / (180 / settings["ball_angle"]),
                        math.pi / (180 / (360 - settings["ball_angle"])),
                        math.pi / (180 / (180 + settings["ball_angle"])),
                        math.pi / (180 / (180 - settings["ball_angle"]))]
-        self.angle = math.pi / (180 / random.choice([settings["ball_angle"],
-                                                     360 - settings["ball_angle"],
-                                                     180 + settings["ball_angle"],
-                                                     180 - settings["ball_angle"]]))
+        self.angle = random.choice(self.angles)
+        
         self.speed = settings["ball_speed"]
         
         self.paddle_left, self.paddle_right = paddle_left, paddle_right
+        
+        self.score = score
     
     def update(self):
         dx = math.cos(self.angle) * self.speed
@@ -146,7 +152,11 @@ class Ball:
         self._check_collisions()
         winner = self._check_winner()
         if winner != 0:
-            self.__init__(self.radius, self.paddle_left, self.paddle_right)
+            if winner == -1:
+                self.score.left += 1
+            elif winner == 1:
+                self.score.right += 1
+            self.__init__(self.radius, self.paddle_left, self.paddle_right, self.score)
     
     def _check_collisions(self):
         if self.x <= self.paddle_left.right and self.paddle_left.top <= self.y <= self.paddle_left.bottom:
@@ -191,3 +201,27 @@ class Ball:
         elif self.x >= self.screen_width:
             return -1
         return 0
+
+
+class Score:
+    def __init__(self, screen):
+        self.left = self.right = 0
+        self.font = pygame.font.SysFont("monospace", 40)
+        self.screen_width = settings["screen_width"]
+        self.score_midx_distance = settings["score_midx_distance"]
+        self.score_border_distance_y = settings["score_border_distance_y"]
+        self.screen = screen
+        self.text_color = settings["text_color"]
+        self.bg_color = settings["bg_color"]
+    
+    def draw(self):
+        for i, n in (-1, self.left), (1, self.right):
+            text = str(n)
+            img = self.font.render(text, True, self.text_color, self.bg_color)
+            rect = img.get_rect()
+            rect.top = self.score_border_distance_y
+            if i == -1:
+                rect.right = self.screen_width / 2 - self.score_midx_distance
+            elif i == 1:
+                rect.left = self.screen_width / 2 + self.score_midx_distance
+            self.screen.blit(img, rect)

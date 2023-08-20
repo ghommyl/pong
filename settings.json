@@ -11,5 +11,8 @@
     "ball_radius": 5,
     "ball_speed": 10,
     "ball_color": [255, 255, 255],
-    "ball_angle": 30
+    "ball_angle": 30,
+    "score_midx_distance": 50,
+    "score_border_distance_y": 10,
+    "text_color": [255, 255, 255]
 }
