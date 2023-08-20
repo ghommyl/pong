@@ -6,6 +6,6 @@
     "paddle_color": [255, 255, 255],
     "paddle_width": 10,
     "paddle_height": 100,
-    "paddle_speed": 100,
+    "paddle_speed": 20,
     "paddle_border_distance_x": 10
 }
