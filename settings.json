@@ -2,5 +2,10 @@
     "screen_width": 1200,
     "screen_height": 800,
     "bg_color": [0, 0, 0],
-    "fps": 60
+    "fps": 60,
+    "paddle_color": [255, 255, 255],
+    "paddle_width": 10,
+    "paddle_height": 100,
+    "paddle_speed": 100,
+    "paddle_border_distance_x": 10
 }
