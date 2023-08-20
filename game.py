@@ -32,12 +32,11 @@ class Game:
                                    self.paddle_width, self.paddle_height)
         
         self.ball_radius = settings["ball_radius"]
-        self.ball = Ball(self.screen_width / 2, self.screen_height / 2, self.ball_radius)
+        self.ball = Ball(self.ball_radius, self.paddle_left, self.paddle_right)
     
     def run(self):
         while True:
             self._check_events()
-            self._check_collisions()
             self._update_screen()
     
     def _check_events(self):
@@ -66,9 +65,6 @@ class Game:
 
         self.clock.tick(self.fps)
         pygame.display.flip()
-    
-    def _check_collisions(self):
-        pass
 
     def _check_keydown_events(self, event):
         match event.key:
@@ -125,19 +121,73 @@ class Paddle(pygame.Rect):
 
 
 class Ball:
-    def __init__(self, x, y, radius):
-        self.x = x
-        self.y = y
+    def __init__(self, radius, paddle_left, paddle_right):
+        self.screen_width, self.screen_height = settings["screen_width"], settings["screen_height"]
+        self.x, self.y = self.screen_width / 2, self.screen_height / 2
         self.radius = radius
         self.color = settings["ball_color"]
-        self.angle = math.pi / (180 / random.choice([settings["ball_angle"], 
+        self.angles = [math.pi / (180 / settings["ball_angle"]),
+                       math.pi / (180 / (360 - settings["ball_angle"])),
+                       math.pi / (180 / (180 + settings["ball_angle"])),
+                       math.pi / (180 / (180 - settings["ball_angle"]))]
+        self.angle = math.pi / (180 / random.choice([settings["ball_angle"],
                                                      360 - settings["ball_angle"],
                                                      180 + settings["ball_angle"],
                                                      180 - settings["ball_angle"]]))
         self.speed = settings["ball_speed"]
+        
+        self.paddle_left, self.paddle_right = paddle_left, paddle_right
     
     def update(self):
         dx = math.cos(self.angle) * self.speed
         dy = math.sin(self.angle) * self.speed
         self.x += dx
         self.y += dy
+        self._check_collisions()
+        winner = self._check_winner()
+        if winner != 0:
+            self.__init__(self.radius, self.paddle_left, self.paddle_right)
+    
+    def _check_collisions(self):
+        if self.x <= self.paddle_left.right and self.paddle_left.top <= self.y <= self.paddle_left.bottom:
+            if self.angle == self.angles[2]:
+                logging.debug("angle from: 2, to: 1")
+                self.angle = self.angles[1]
+
+            elif self.angle == self.angles[3]:
+                logging.debug("angle from: 3, to: 0")
+                self.angle = self.angles[0]
+
+        elif self.x >= self.paddle_right.left and self.paddle_right.top <= self.y <= self.paddle_right.bottom:
+            if self.angle == self.angles[0]:
+                logging.debug("angle from: 0, to: 3")
+                self.angle = self.angles[3]
+            
+            elif self.angle == self.angles[1]:
+                logging.debug("angle from: 1, to: 2")
+                self.angle = self.angles[2]
+
+        if self.y <= 0:
+            if self.angle == self.angles[1]:
+                logging.debug("angle from: 1, to: 0")
+                self.angle = self.angles[0]
+            
+            elif self.angle == self.angles[2]:
+                logging.debug("angle from: 2, to: 3")
+                self.angle = self.angles[3]
+        
+        elif self.y >= self.screen_height:
+            if self.angle == self.angles[0]:
+                logging.debug("angle from: 0, to: 1")
+                self.angle = self.angles[1]
+
+            elif self.angle == self.angles[3]:
+                logging.debug("angle from: 3, to: 2")
+                self.angle = self.angles[2]
+    
+    def _check_winner(self):
+        if self.x <= 0:
+            return 1
+        elif self.x >= self.screen_width:
+            return -1
+        return 0
