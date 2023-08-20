@@ -37,6 +37,8 @@ class Game:
 
         self.ball_radius = settings["ball_radius"]
         self.ball = Ball(self.ball_radius, self.paddle_left, self.paddle_right, self.score)
+
+        self.paused = False
     
     def run(self):
         while True:
@@ -56,20 +58,21 @@ class Game:
                     self._check_keyup_events(event)
     
     def _update_screen(self):
-        self.paddle_left.update()
-        self.paddle_right.update()
-        self.ball.update()
+        if not self.paused:
+            self.paddle_left.update()
+            self.paddle_right.update()
+            self.ball.update()
 
-        self.screen.fill(self.bg_color)
+            self.screen.fill(self.bg_color)
 
-        self.score.draw()
-        pygame.draw.rect(self.screen, self.paddle_left.color, self.paddle_left)
-        pygame.draw.rect(self.screen, self.paddle_right.color, self.paddle_right)
-        pygame.draw.circle(self.screen, self.ball.color,
-                           (self.ball.x, self.ball.y), self.ball.radius)
+            self.score.draw()
+            pygame.draw.rect(self.screen, self.paddle_left.color, self.paddle_left)
+            pygame.draw.rect(self.screen, self.paddle_right.color, self.paddle_right)
+            pygame.draw.circle(self.screen, self.ball.color,
+                            (self.ball.x, self.ball.y), self.ball.radius)
 
-        self.clock.tick(self.fps)
-        pygame.display.flip()
+            self.clock.tick(self.fps)
+            pygame.display.flip()
 
     def _check_keydown_events(self, event):
         match event.key:
@@ -89,6 +92,10 @@ class Game:
             case pygame.K_q:
                 logging.info("exiting game")
                 sys.exit()
+
+            case pygame.K_SPACE:
+                logging.info("game paused/continued")
+                self.paused = not self.paused
 
     def _check_keyup_events(self, event):
         match event.key:
