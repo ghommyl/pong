@@ -1,4 +1,6 @@
 import logging
+import math
+import random
 import sys
 
 import pygame
@@ -23,11 +25,14 @@ class Game:
         self.paddle_width, self.paddle_height = settings["paddle_width"], settings["paddle_height"]
         self.paddle_border_distance_x = settings["paddle_border_distance_x"]
         self.paddle_left = Paddle(self.paddle_border_distance_x,                                            # left
-                                  round(self.screen_height / 2 - self.paddle_height / 2),                   # top
+                                  self.screen_height / 2 - self.paddle_height / 2,                          # top
                                   self.paddle_width, self.paddle_height)
         self.paddle_right = Paddle(self.screen_width - self.paddle_border_distance_x - self.paddle_width,   # left
-                                   round(self.screen_height / 2 - self.paddle_height / 2),                  # top
+                                   self.screen_height / 2 - self.paddle_height / 2,                         # top
                                    self.paddle_width, self.paddle_height)
+        
+        self.ball_radius = settings["ball_radius"]
+        self.ball = Ball(self.screen_width / 2, self.screen_height / 2, self.ball_radius)
     
     def run(self):
         while True:
@@ -50,11 +55,14 @@ class Game:
     def _update_screen(self):
         self.paddle_left.update()
         self.paddle_right.update()
+        self.ball.update()
 
         self.screen.fill(self.bg_color)
 
-        pygame.draw.rect(self.screen, settings["paddle_color"], self.paddle_left)
-        pygame.draw.rect(self.screen, settings["paddle_color"], self.paddle_right)
+        pygame.draw.rect(self.screen, self.paddle_left.color, self.paddle_left)
+        pygame.draw.rect(self.screen, self.paddle_right.color, self.paddle_right)
+        pygame.draw.circle(self.screen, self.ball.color,
+                           (self.ball.x, self.ball.y), self.ball.radius)
 
         self.clock.tick(self.fps)
         pygame.display.flip()
@@ -103,6 +111,7 @@ class Paddle(pygame.Rect):
         self.moving_up = self.moving_down = False
         self.speed = settings["paddle_speed"]
         self.screen_width, self.screen_height = settings["screen_width"], settings["screen_height"]
+        self.color = tuple(settings["paddle_color"])
 
     def update(self):
         if self.moving_up:
@@ -113,3 +122,22 @@ class Paddle(pygame.Rect):
             self.top = 0
         if self.bottom > self.screen_height:
             self.bottom = self.screen_height
+
+
+class Ball:
+    def __init__(self, x, y, radius):
+        self.x = x
+        self.y = y
+        self.radius = radius
+        self.color = settings["ball_color"]
+        self.angle = math.pi / (180 / random.choice([settings["ball_angle"], 
+                                                     360 - settings["ball_angle"],
+                                                     180 + settings["ball_angle"],
+                                                     180 - settings["ball_angle"]]))
+        self.speed = settings["ball_speed"]
+    
+    def update(self):
+        dx = math.cos(self.angle) * self.speed
+        dy = math.sin(self.angle) * self.speed
+        self.x += dx
+        self.y += dy
