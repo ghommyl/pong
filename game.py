@@ -2,25 +2,27 @@ import logging
 
 import pygame
 
-from colors import *
+from settings import settings
+
+logging.basicConfig(level=logging.DEBUG, format="%(levelname)-10s- %(message)s")
 
 
 class Game:
-    def __init__(self, screen_width=1200, screen_height=800):
-        self.screen = pygame.display.set_mode((screen_width, screen_height))
+    def __init__(self):
+        self.screen = pygame.display.set_mode((settings["screen_width"], settings["screen_height"]))
         pygame.display.set_caption("Welcome to Pong Game!")
-        self.bg_color = BLACK
+        self.bg_color = tuple(settings["bg_color"])
         self.clock = pygame.time.Clock()
-        self.fps = 60
+        self.fps = settings["fps"]
+        logging.info(f"fps: {self.fps}")
     
     def run(self):
-        keep_going = True
-        while keep_going:
+        while True:
             for event in pygame.event.get():
                 match event.type:
                     case pygame.QUIT:
-                        logging.info("Game quit")
-                        keep_going = False
+                        logging.info("quitting game")
+                        return
 
             self.screen.fill(self.bg_color)
 
