@@ -1,7 +1,14 @@
 ### Description
 This is a pong game written using python
 ### How to play
-Run `python3 pong.py`
+```bash
+git clone https://gitee.com/ghommyl/pong.git
+cd pong
+python3 -m venv pong
+source pong/bin/activate
+pip install -r requirements.txt
+python pong.py
+```
 
 |Key|Description|
 |:--|:--|
