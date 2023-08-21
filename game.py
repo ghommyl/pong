@@ -147,7 +147,8 @@ class Ball:
                        math.pi / (180 / (180 - self.ball_angle))]
         self.angle = random.choice(self.angles)
         
-        self.speed = settings["ball_speed"]
+        self.speed = random.uniform(7, 10)
+        logging.info(f"ball_speed: {self.speed}")
         
         self.paddle_left, self.paddle_right = paddle_left, paddle_right
         
