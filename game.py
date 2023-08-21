@@ -144,7 +144,7 @@ class Paddle(pygame.Rect):
 class Ball:
     def __init__(self, radius, paddle_left, paddle_right, score):
         self.screen_width, self.screen_height = settings["screen_width"], settings["screen_height"]
-        self.x, self.y = self.screen_width / 2, self.screen_height / 2
+        self.x, self.y = self.screen_width / 2, random.uniform(0, self.screen_height)
         self.radius = radius
         self.color = settings["ball_color"]
 
