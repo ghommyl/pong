@@ -139,10 +139,12 @@ class Ball:
         self.radius = radius
         self.color = settings["ball_color"]
 
-        self.angles = [math.pi / (180 / settings["ball_angle"]),
-                       math.pi / (180 / (360 - settings["ball_angle"])),
-                       math.pi / (180 / (180 + settings["ball_angle"])),
-                       math.pi / (180 / (180 - settings["ball_angle"]))]
+        self.ball_angle = random.uniform(30, 60)
+        logging.info(f"ball_angle: {self.ball_angle}")
+        self.angles = [math.pi / (180 / self.ball_angle),
+                       math.pi / (180 / (360 - self.ball_angle)),
+                       math.pi / (180 / (180 + self.ball_angle)),
+                       math.pi / (180 / (180 - self.ball_angle))]
         self.angle = random.choice(self.angles)
         
         self.speed = settings["ball_speed"]
