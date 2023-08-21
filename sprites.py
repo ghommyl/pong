@@ -47,6 +47,8 @@ class Ball:
         self.paddle_left, self.paddle_right = paddle_left, paddle_right
         
         self.score = score
+
+        self.removed = False
     
     def update(self):
         dx = math.cos(self.angle) * self.speed
@@ -60,7 +62,7 @@ class Ball:
                 self.score.left += 1
             elif winner == 1:
                 self.score.right += 1
-            self.__init__(self.radius, self.paddle_left, self.paddle_right, self.score)
+            self.removed = True
     
     def _check_collisions(self):
         if self.x <= self.paddle_left.right and self.paddle_left.top <= self.y <= self.paddle_left.bottom:

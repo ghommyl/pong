@@ -1,4 +1,5 @@
 import logging
+import random
 import sys
 
 import pygame
@@ -37,7 +38,8 @@ class Game:
         self.score = Score(self.screen)
 
         self.ball_radius = settings["ball_radius"]
-        self.ball = Ball(self.ball_radius, self.paddle_left, self.paddle_right, self.score)
+        self.ball_group = set([Ball(self.ball_radius, self.paddle_left, self.paddle_right, self.score)])
+        self.ball_appear_dt = settings["ball_appear_dt"]
 
         self.paused = False
         self.paused_text = Text("Paused", self.screen)
@@ -45,11 +47,15 @@ class Game:
         self.paused_text.rect.center = self.screen_rect.center
     
     def run(self):
+        time = 0
         while True:
-            self._check_events()
+            time += 1
+            self._check_events(time)
             self._update_screen()
+            if time == self.ball_appear_dt:
+                time = 0
     
-    def _check_events(self):
+    def _check_events(self, time):
         for event in pygame.event.get():
             match event.type:
                 case pygame.QUIT:
@@ -60,6 +66,9 @@ class Game:
                     self._check_keydown_events(event)
                 case pygame.KEYUP:
                     self._check_keyup_events(event)
+        
+        if time % self.ball_appear_dt == 0 and random.randint(0, 1):
+            self.ball_group.add(Ball(self.ball_radius, self.paddle_left, self.paddle_right, self.score))
     
     def _update_screen(self):
         self.screen.fill(self.bg_color)
@@ -71,14 +80,18 @@ class Game:
         else:
             self.paddle_left.update()
             self.paddle_right.update()
-            self.ball.update()
+            for ball in self.ball_group.copy():
+                ball.update()
+                if ball.removed:
+                    self.ball_group.remove(ball)
 
         self.score.draw()
 
         pygame.draw.rect(self.screen, self.paddle_left.color, self.paddle_left)
         pygame.draw.rect(self.screen, self.paddle_right.color, self.paddle_right)
-        pygame.draw.circle(self.screen, self.ball.color,
-                        (self.ball.x, self.ball.y), self.ball.radius)
+        for ball in self.ball_group:
+            pygame.draw.circle(self.screen, ball.color,
+                               (ball.x, ball.y), ball.radius)
 
         self.clock.tick(self.fps)
         pygame.display.flip()
