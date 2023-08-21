@@ -15,6 +15,7 @@ class Game:
         self.screen_width, self.screen_height = settings["screen_width"], settings["screen_height"]
 
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+        self.screen_rect = self.screen.get_rect()
         
         pygame.display.set_caption("Welcome to Pong Game!")
 
@@ -39,6 +40,9 @@ class Game:
         self.ball = Ball(self.ball_radius, self.paddle_left, self.paddle_right, self.score)
 
         self.paused = False
+        self.paused_text = Text("Paused", self.screen)
+        self.paused_text.prep_rect()
+        self.paused_text.rect.center = self.screen_rect.center
     
     def run(self):
         while True:
@@ -58,21 +62,26 @@ class Game:
                     self._check_keyup_events(event)
     
     def _update_screen(self):
-        if not self.paused:
+        self.screen.fill(self.bg_color)
+
+        if self.paused:
+            self.paused_text.draw()
+            logging.debug("Paused text blitted")
+
+        else:
             self.paddle_left.update()
             self.paddle_right.update()
             self.ball.update()
 
-            self.screen.fill(self.bg_color)
+        self.score.draw()
 
-            self.score.draw()
-            pygame.draw.rect(self.screen, self.paddle_left.color, self.paddle_left)
-            pygame.draw.rect(self.screen, self.paddle_right.color, self.paddle_right)
-            pygame.draw.circle(self.screen, self.ball.color,
-                            (self.ball.x, self.ball.y), self.ball.radius)
+        pygame.draw.rect(self.screen, self.paddle_left.color, self.paddle_left)
+        pygame.draw.rect(self.screen, self.paddle_right.color, self.paddle_right)
+        pygame.draw.circle(self.screen, self.ball.color,
+                        (self.ball.x, self.ball.y), self.ball.radius)
 
-            self.clock.tick(self.fps)
-            pygame.display.flip()
+        self.clock.tick(self.fps)
+        pygame.display.flip()
 
     def _check_keydown_events(self, event):
         match event.key:
@@ -216,22 +225,35 @@ class Ball:
 class Score:
     def __init__(self, screen):
         self.left = self.right = 0
-        self.font = pygame.font.SysFont("monospace", 40)
         self.screen_width = settings["screen_width"]
         self.score_midx_distance = settings["score_midx_distance"]
         self.score_border_distance_y = settings["score_border_distance_y"]
         self.screen = screen
-        self.text_color = settings["text_color"]
-        self.bg_color = settings["bg_color"]
     
     def draw(self):
         for i, n in (-1, self.left), (1, self.right):
-            text = str(n)
-            img = self.font.render(text, True, self.text_color, self.bg_color)
-            rect = img.get_rect()
-            rect.top = self.score_border_distance_y
-            if i == -1:
-                rect.right = self.screen_width / 2 - self.score_midx_distance
-            elif i == 1:
-                rect.left = self.screen_width / 2 + self.score_midx_distance
-            self.screen.blit(img, rect)
+            text = Text(str(n), self.screen)
+            text.prep_rect()
+            text.rect.top = self.score_border_distance_y
+            match i:
+                case -1:
+                    text.rect.right = self.screen_width / 2 - self.score_midx_distance
+                case 1:
+                    text.rect.left = self.screen_width / 2 + self.score_midx_distance
+            text.draw()
+
+
+class Text:
+    def __init__(self, text, screen):
+        self.text = text
+        self.font = pygame.font.SysFont("monospace", 40)
+        self.text_color = settings["text_color"]
+        self.bg_color = settings["bg_color"]
+        self.screen = screen
+    
+    def prep_rect(self):
+        self.img = self.font.render(self.text, True, self.text_color, self.bg_color)
+        self.rect = self.img.get_rect()
+    
+    def draw(self):
+        self.screen.blit(self.img, self.rect)
