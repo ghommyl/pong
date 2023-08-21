@@ -58,10 +58,11 @@ class Ball:
         self._check_collisions()
         winner = self._check_winner()
         if winner != 0:
-            if winner == -1:
-                self.score.left += 1
-            elif winner == 1:
-                self.score.right += 1
+            match winner:
+                case -1:
+                    self.score.left += 1
+                case 1:
+                    self.score.right += 1
             self.removed = True
     
     def _check_collisions(self):
@@ -70,7 +71,7 @@ class Ball:
                 logging.debug("angle from: 2, to: 1")
                 self.angle = self.angles[1]
 
-            elif self.angle == self.angles[3]:
+            if self.angle == self.angles[3]:
                 logging.debug("angle from: 3, to: 0")
                 self.angle = self.angles[0]
 
@@ -79,7 +80,7 @@ class Ball:
                 logging.debug("angle from: 0, to: 3")
                 self.angle = self.angles[3]
             
-            elif self.angle == self.angles[1]:
+            if self.angle == self.angles[1]:
                 logging.debug("angle from: 1, to: 2")
                 self.angle = self.angles[2]
 
@@ -88,7 +89,7 @@ class Ball:
                 logging.debug("angle from: 1, to: 0")
                 self.angle = self.angles[0]
             
-            elif self.angle == self.angles[2]:
+            if self.angle == self.angles[2]:
                 logging.debug("angle from: 2, to: 3")
                 self.angle = self.angles[3]
         
