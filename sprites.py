@@ -1,4 +1,3 @@
-import logging
 import math
 import random
 
@@ -27,14 +26,16 @@ class Paddle(pygame.Rect):
 
 
 class Ball:
-    def __init__(self, radius, paddle_left, paddle_right, score):
+    def __init__(self, logger, radius, paddle_left, paddle_right, score):
+        self.logger = logger
+
         self.screen_width, self.screen_height = settings["screen_width"], settings["screen_height"]
         self.x, self.y = self.screen_width / 2, random.uniform(0, self.screen_height)
         self.radius = radius
         self.color = settings["ball_color"]
 
         self.ball_angle = random.uniform(30, 60)
-        logging.info(f"ball_angle: {self.ball_angle}")
+        self.logger.info(f"ball_angle: {self.ball_angle}")
         self.angles = [math.pi / (180 / self.ball_angle),
                        math.pi / (180 / (360 - self.ball_angle)),
                        math.pi / (180 / (180 + self.ball_angle)),
@@ -42,7 +43,7 @@ class Ball:
         self.angle = random.choice(self.angles)
         
         self.speed = random.uniform(7, 10)
-        logging.info(f"ball_speed: {self.speed}")
+        self.logger.info(f"ball_speed: {self.speed}")
         
         self.paddle_left, self.paddle_right = paddle_left, paddle_right
         
@@ -68,38 +69,38 @@ class Ball:
     def _check_collisions(self):
         if self.x <= self.paddle_left.right and self.paddle_left.top <= self.y <= self.paddle_left.bottom:
             if self.angle == self.angles[2]:
-                logging.debug("angle from: 2, to: 1")
+                self.logger.debug("angle from: 2, to: 1")
                 self.angle = self.angles[1]
 
             if self.angle == self.angles[3]:
-                logging.debug("angle from: 3, to: 0")
+                self.logger.debug("angle from: 3, to: 0")
                 self.angle = self.angles[0]
 
         elif self.x >= self.paddle_right.left and self.paddle_right.top <= self.y <= self.paddle_right.bottom:
             if self.angle == self.angles[0]:
-                logging.debug("angle from: 0, to: 3")
+                self.logger.debug("angle from: 0, to: 3")
                 self.angle = self.angles[3]
             
             if self.angle == self.angles[1]:
-                logging.debug("angle from: 1, to: 2")
+                self.logger.debug("angle from: 1, to: 2")
                 self.angle = self.angles[2]
 
         if self.y <= 0:
             if self.angle == self.angles[1]:
-                logging.debug("angle from: 1, to: 0")
+                self.logger.debug("angle from: 1, to: 0")
                 self.angle = self.angles[0]
             
             if self.angle == self.angles[2]:
-                logging.debug("angle from: 2, to: 3")
+                self.logger.debug("angle from: 2, to: 3")
                 self.angle = self.angles[3]
         
         elif self.y >= self.screen_height:
             if self.angle == self.angles[0]:
-                logging.debug("angle from: 0, to: 1")
+                self.logger.debug("angle from: 0, to: 1")
                 self.angle = self.angles[1]
 
             elif self.angle == self.angles[3]:
-                logging.debug("angle from: 3, to: 2")
+                self.logger.debug("angle from: 3, to: 2")
                 self.angle = self.angles[2]
     
     def _check_winner(self):
