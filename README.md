@@ -1,5 +1,5 @@
 ### Description
-This is a pong game written using python
+This is a pong game written using pygame
 ### How to play
 ```bash
 git clone https://gitee.com/ghommyl/pong.git
